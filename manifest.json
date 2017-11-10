@@ -1,0 +1,7 @@
+{
+  "name": "crypto-dash",
+  "short_name": "crypto-dash",
+  "description": "Crypto currency dashboard",
+  "start_url": "/",
+  "display": "standalone"
+}
