@@ -8,11 +8,16 @@
         display: block;
       }
     </style>
+    <h1>Crypto Currency Dashboard</h1>
     <iron-ajax
       id="coinbase"
       handle-as="json"
+      params="abc"
       on-response="_handleResponse"
       debounce-duration="300"></iron-ajax>
+    <template is="dom-repeat" items="[[currencies]]">
+      <p>[[item.code]] - [[item.name]] - [[item.price]]</p>
+    </template>
   </template>
 
   <script>
@@ -29,13 +34,16 @@
             value: [
               {
                 code: 'BTC',
-                name: 'Bitcoin'
+                name: 'Bitcoin',
+                price: 0
               }, {
                 code: 'ETH',
-                name: 'Ethereum'
+                name: 'Ethereum',
+                price: 0
               },{
                 code: 'LTC',
-                name: 'Litecoin'
+                name: 'Litecoin',
+                price: 0
               }
             ]
           }
@@ -43,22 +51,25 @@
       }
       ready() {
         super.ready();
-        Polymer.RenderStatus.afterNextRender(this, function() {
-          this._getCurrencyData();
-        });
+        Polymer.RenderStatus.afterNextRender(this, this._getCurrencyData);
       }
 
       _getCurrencyData() {
         let ajax = this.$.coinbase;
         const currencies = this.currencies;
-        currencies.forEach(function(element) {
-          ajax.url= 'https://api.coinbase.com/v2/prices/' + element.code + '-USD/spot?';
+        currencies.forEach(element => {
+          ajax.url= `https://api.coinbase.com/v2/prices/${element.code}-USD/spot?`;
           ajax.generateRequest();    
-        }, this);
+        });
       }
 
       _handleResponse(response){
-        console.log(response.detail.__data.response.data);
+        this._computeCurrencyPrice(response.detail.__data.response.data);
+      }
+
+      _computeCurrencyPrice({ base, amount }){
+        let index = this.currencies.findIndex(_currency => _currency.code === base);
+        this.set(`currencies.${index}.price`, amount);        
       }
     }
 
